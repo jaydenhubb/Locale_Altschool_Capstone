@@ -13,7 +13,7 @@ interface stateBody {
     population: string;
     slogan:string
     landmass:string
-    lgas:string[]
+    lgas:string
     region: string
     governor: string
 
@@ -26,9 +26,9 @@ export const trial: RequestHandler<unknown, unknown, stateBody, unknown>= async(
             throw createHttpError(400, "all fields must be filled")
         }
         // console.log(lgas);
-        
+        const newArr= lgas.split(",")
         const state =await StatesModel.create({
-            name, capital, population, slogan, landmass, lgas, region, governor
+            name, capital, population, slogan, landmass, lgas:newArr, region, governor
         })
         res.status(201).json({name, capital, population, slogan, landmass, lgas, region, governor})
     } catch (error) {
@@ -61,11 +61,37 @@ export const getData : RequestHandler<unknown, unknown, unknown, reqQuery>= asyn
             })
         }
         else if(state && !region && !lgas){
-            const info = await states.find({name:state})
+            const info = await StatesModel.find({name:state})
             if(!info){
                 throw createHttpError(404, "No data found. Perhaps check your spellings?")
             }
+            const result = info.map((ans)=>{
+                return {"State": ans.name,
+                        "Capital": ans.capital,
+                        "Slogan": ans.slogan,
+                        "Governor": ans.governor,
+                        "Region": ans.region
+            }
+            })
+            res.status(200).json(result)
+        }
+        else if(lgas && !state && !region){
+            const info = await StatesModel.find({})
+            const result = info.filter((val)=>{
+                return val.lgas.includes(lgas)
+            })
+            console.log(result);
+            // console.log(info);
             
+            if(!info){
+                throw createHttpError(404, "No data found. Perhaps check your spellings?")
+            }
+            // const results = info.map((ans)=>{
+            //     return {"State": ans.name,
+            //             "Capital": ans.capital,
+            // }
+            // })
+            res.status(200).json(result)
         }
 
     } catch (error) {
