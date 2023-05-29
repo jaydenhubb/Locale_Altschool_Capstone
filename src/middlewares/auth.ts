@@ -1,27 +1,27 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
-import jwt from "jsonwebtoken"
-import env from '../utils/validateEnvs'
 import UserModel from '../models/user'
 
-export const RequireAuth: RequestHandler = async(req, res, next)=>{
-    interface JwtPayload{
-        _id: string
-    }
+interface reqQuery {
+    state?: string
+    lgas?: string
+    region?: string
+    apikey?: string
+}
+
+export const RequireAuth: RequestHandler<unknown, unknown, unknown, reqQuery> = async (req, res, next) => {
 
     try {
-        const token = req.cookies.token
-        if(!token){
-            next(createHttpError(401, "User Not Authenticated, Please Log in"))
+        const { apikey } = req.query
+        if (!apikey) {
+            next(createHttpError(401, "User Not Authenticated, Please use a valid APikey or create an account to get one"))
         }
-        const {_id }= jwt.verify(token, env.JWT_SECRET ) as JwtPayload
-        const user = await UserModel.findById(_id)
-        if(!user){
-            next(createHttpError(404, "User not found"))
-        }else{
+        const user = await UserModel.findOne({ apiKey: apikey })
+        if (!user) {
+            next(createHttpError(404, "Invalid API key"))
+        } else {
             next()
         }
-       
     } catch (error) {
         next(error)
     }
