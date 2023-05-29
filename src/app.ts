@@ -6,6 +6,8 @@ import cookieParser from 'cookie-parser';
 import errorHandler from './middlewares/errorMiddleware';
 import userRoute from "./routes/userRoute"
 import statesroute from "./routes/datatRoute"
+import { limiter } from './middlewares/limiter';
+
 
 
 const app = express()
@@ -20,6 +22,7 @@ app.use(
     })
   );
 
+app.use(limiter)
 app.use('/api/users', userRoute)
 app.use('/api/data', statesroute)
 

@@ -8,7 +8,8 @@ const stateSchema = new Schema({
     population: String,
     landmass: String,
     lgas: Array,
-    region:String
+    region:String, 
+    deputy: String
 })
 
 type State = InferSchemaType<typeof stateSchema>

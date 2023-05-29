@@ -1,7 +1,6 @@
-import {RequestHandler} from 'express'
-import createHttpError  from 'http-errors'
+import { RequestHandler } from 'express'
+import createHttpError from 'http-errors'
 import StatesModel from '../models/states'
-import states from '../models/states';
 
 
 
@@ -11,26 +10,25 @@ interface stateBody {
     name: string;
     capital: string
     population: string;
-    slogan:string
-    landmass:string
-    lgas:string
+    slogan: string
+    landmass: string
+    lgas: string
     region: string
     governor: string
-
+    deputy:string
 }
-
-export const trial: RequestHandler<unknown, unknown, stateBody, unknown>= async(req, res, next)=>{
-    const {name, capital, population, slogan, landmass, lgas, region, governor} = req.body
+ export const trial: RequestHandler<unknown, unknown, stateBody, unknown> = async (req, res, next) => {
+    const { name, capital, population, slogan, landmass, lgas, region, governor, deputy } = req.body
     try {
-        if(!name||!capital||!population||!slogan||!landmass||!lgas||!region||!governor){
+        if (!name || !capital || !population || !slogan || !landmass || !lgas || !region || !governor) {
             throw createHttpError(400, "all fields must be filled")
         }
         // console.log(lgas);
-        const newArr= lgas.split(",")
-        const state =await StatesModel.create({
-            name, capital, population, slogan, landmass, lgas:newArr, region, governor
+        const newArr = lgas.split(",")
+        const state = await StatesModel.create({
+            name, capital, population, slogan, landmass, lgas: newArr, region, governor, deputy
         })
-        res.status(201).json({name, capital, population, slogan, landmass, lgas, region, governor})
+        res.status(201).json({ name, capital, population, slogan, landmass, lgas, region, governor, deputy })
     } catch (error) {
         next(error)
     }
@@ -40,19 +38,18 @@ export const trial: RequestHandler<unknown, unknown, stateBody, unknown>= async(
 
 interface reqQuery {
     state?: string
-    lgas?:string
-    region?:string
+    lgas?: string
+    region?: string
 }
-
-export const getData : RequestHandler<unknown, unknown, unknown, reqQuery>= async(req, res, next)=>{
+ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = async (req, res, next) => {
     try {
-        const {state, lgas, region} = req.query
-        if(region && !state && !lgas){
-            const info = await StatesModel.find({region:region})
-            if(!info){
+        const { state, lgas, region } = req.query
+        if (region?.toLowerCase()) {
+            const info = await StatesModel.find({ region: region })
+            if (info.length === 0) {
                 throw createHttpError(404, "No data found. Perhaps check your spellings?")
             }
-            const result = info.map((ans)=>{
+            const result = info.map((ans) => {
                 return ans.name
             })
             res.status(200).json({
@@ -60,41 +57,35 @@ export const getData : RequestHandler<unknown, unknown, unknown, reqQuery>= asyn
                 "States in region": result
             })
         }
-        else if(state && !region && !lgas){
-            const info = await StatesModel.find({name:state})
-            if(!info){
+        else if (state?.toLowerCase()) {
+            const info = await StatesModel.find({ name: state })
+            if (!info) {
                 throw createHttpError(404, "No data found. Perhaps check your spellings?")
             }
-            const result = info.map((ans)=>{
-                return {"State": ans.name,
-                        "Capital": ans.capital,
-                        "Slogan": ans.slogan,
-                        "Governor": ans.governor,
-                        "Region": ans.region
-            }
+            const result = info.map((ans) => {
+                return {
+                    "State": ans.name,
+                    "Capital": ans.capital,
+                    "Slogan": ans.slogan,
+                    "Governor": ans.governor,
+                    "Region": ans.region
+                }
             })
             res.status(200).json(result)
         }
-        else if(lgas && !state && !region){
-            const info = await StatesModel.find({})
-            const result = info.filter((val)=>{
-                return val.lgas.includes(lgas)
-            })
-            console.log(result);
-            // console.log(info);
-            
-            if(!info){
+        else if (lgas?.toLowerCase().trim()) {
+            const info = await StatesModel.find({ lgas: lgas })
+            console.log(info);
+
+
+            if (!info) {
                 throw createHttpError(404, "No data found. Perhaps check your spellings?")
             }
-            // const results = info.map((ans)=>{
-            //     return {"State": ans.name,
-            //             "Capital": ans.capital,
-            // }
-            // })
-            res.status(200).json(result)
+            res.status(200).json(info)
         }
 
     } catch (error) {
         next(error)
     }
 }
+

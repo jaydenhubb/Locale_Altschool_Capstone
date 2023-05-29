@@ -3,7 +3,6 @@ import createHttpError  from 'http-errors'
 import UserModel from '../models/user'
 import  * as util  from "../utils";
 import generateApiKey from 'generate-api-key';
-import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 
 interface SignUpBody {
@@ -27,32 +26,19 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= asyn
                     throw createHttpError(400, 'Email already exists');
                 }
         // create APIkey
-        const apiKey = generateApiKey({
+        const apikey = generateApiKey({
             method: "base32",
             dashes: false,
             prefix: "jay",
           });
-        
-        // hash key
-        const hashKey = crypto.createHash('sha256').update(apiKey.toString()).digest('hex')
-        console.log(typeof(hashKey));
-        
-        
-        
-        // hass Password
-        // const hashedPassword = hashPass(password)
-        // console.log(typeof(hashedPassword));
-        // console.log(hashedPassword);
-        
         // create user
         const user = await UserModel.create({
             email,
             password,
-            apiKey:hashKey
+            apiKey:apikey
         })
         // create token
         const token = util.createToken(user._id)
-        // console.log(token);
         
         res.cookie("token", token, {
             path: "/",
@@ -62,8 +48,8 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= asyn
             secure: true,
           });
           if(user){
-            const {email, apiKey}= user
-            res.status(201).json({email, apiKey})
+            const {email, }= user
+            res.status(201).json({email,"key":apikey })
           }
     }
 
@@ -86,12 +72,8 @@ export const login: RequestHandler<unknown, unknown, loginBody, unknown>= async(
         const user = await UserModel.findOne({email}).select("+password").select("+email").exec()
         if(!user){
             throw createHttpError(401, "Invalid Credentials")
-        }
-    
-        
+        } 
         const hashedPassword = await bcrypt.compare(password, user.password)
-    
-        
         if(!hashedPassword){
             throw createHttpError(401, "Invalid Credentials")
         }
@@ -108,3 +90,4 @@ export const login: RequestHandler<unknown, unknown, loginBody, unknown>= async(
         next(error)
     }
 }
+
