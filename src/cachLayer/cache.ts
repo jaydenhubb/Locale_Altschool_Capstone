@@ -1,0 +1,15 @@
+
+import { createClient } from 'redis';
+import env from '../utils/validateEnvs';
+
+const client = createClient({
+    password: env.REDIS_PASSWORD,
+    socket: {
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT
+    }
+});
+
+export default client
+
+  

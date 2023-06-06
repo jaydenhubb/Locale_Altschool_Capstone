@@ -6,6 +6,8 @@ import StatesModel from '../models/states'
 
 
 
+
+
 interface stateBody {
     name: string;
     capital: string
@@ -42,12 +44,14 @@ interface reqQuery {
     region?: string
 }
  export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = async (req, res, next) => {
+
     try {
+        
         const { state, lgas, region } = req.query
         if (region?.toLowerCase()) {
             const info = await StatesModel.find({ region: region })
             if (info.length === 0) {
-                throw createHttpError(404, "No data found. Perhaps check your spellings?")
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${region.toUpperCase()} correctly?`)
             }
             const result = info.map((ans) => {
                 return ans.name
@@ -57,11 +61,16 @@ interface reqQuery {
                 "States in region": result
             })
         }
-        else if (state?.toLowerCase()) {
+        
+        else if (state) {
             const info = await StatesModel.find({ name: state })
-            if (!info) {
-                throw createHttpError(404, "No data found. Perhaps check your spellings?")
+            if (info.length===0) {
+                console.log("hey boy");
+                
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${state.toUpperCase()} correctly?`)
             }
+            console.log('hey girl');
+            
             const result = info.map((ans) => {
                 return {
                     "State": ans.name,
@@ -73,13 +82,13 @@ interface reqQuery {
             })
             res.status(200).json(result)
         }
-        else if (lgas?.toLowerCase().trim()) {
+        else if (lgas) {
             const info = await StatesModel.find({ lgas: lgas })
             console.log(info);
 
 
             if (!info) {
-                throw createHttpError(404, "No data found. Perhaps check your spellings?")
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${lgas.toUpperCase()} correctly?`)
             }
             res.status(200).json(info)
         }
@@ -89,3 +98,6 @@ interface reqQuery {
     }
 }
 
+
+
+// 1oqgRrklivASYQMaIh9nLeNMG9FRvYzE
