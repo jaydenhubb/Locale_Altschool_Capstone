@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express'
 import createHttpError from 'http-errors'
 import StatesModel from '../models/states'
+import client from '../cachLayer/cache'
 
 
 
@@ -17,17 +18,16 @@ interface stateBody {
     lgas: string
     region: string
     governor: string
-    deputy:string
+    deputy: string
 }
- export const trial: RequestHandler<unknown, unknown, stateBody, unknown> = async (req, res, next) => {
+export const trial: RequestHandler<unknown, unknown, stateBody, unknown> = async (req, res, next) => {
     const { name, capital, population, slogan, landmass, lgas, region, governor, deputy } = req.body
     try {
         if (!name || !capital || !population || !slogan || !landmass || !lgas || !region || !governor) {
             throw createHttpError(400, "all fields must be filled")
         }
-        // console.log(lgas);
         const newArr = lgas.split(",")
-        const state = await StatesModel.create({
+        await StatesModel.create({
             name, capital, population, slogan, landmass, lgas: newArr, region, governor, deputy
         })
         res.status(201).json({ name, capital, population, slogan, landmass, lgas, region, governor, deputy })
@@ -43,34 +43,51 @@ interface reqQuery {
     lgas?: string
     region?: string
 }
- export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = async (req, res, next) => {
+export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = async (req, res, next) => {
 
     try {
-        
         const { state, lgas, region } = req.query
-        if (region?.toLowerCase()) {
-            const info = await StatesModel.find({ region: region })
+        
+        if (!region || !lgas || !state) {
+            throw createHttpError(400, "You must attach a 'state', 'lgas', or 'region' and it's corresponding search term to proceed. Vist the documentation to see the guide. ")
+        }
+
+        if (region) {
+            const data = region.toLocaleUpperCase().trim()
+            // set cach key
+            const cachedKey = `Data : ${data}`
+            // Check it's existence in the cache
+            const cachedData = await client.get(cachedKey)
+            if (cachedData) {
+                return res.status(200).json(JSON.parse(cachedData))
+            }
+            const info = await StatesModel.find({ region: data })
             if (info.length === 0) {
-                throw createHttpError(404, `No data found. Perhaps check if you spelt ${region.toUpperCase()} correctly?`)
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${data.toUpperCase()} correctly?`)
             }
             const result = info.map((ans) => {
                 return ans.name
             })
-            res.status(200).json({
+            const resData = {
                 "Number of states in region": info.length,
                 "States in region": result
-            })
-        }
-        
-        else if (state) {
-            const info = await StatesModel.find({ name: state })
-            if (info.length===0) {
-                console.log("hey boy");
-                
-                throw createHttpError(404, `No data found. Perhaps check if you spelt ${state.toUpperCase()} correctly?`)
             }
-            console.log('hey girl');
-            
+            // set cach value 
+            await client.setEx(cachedKey, 600, JSON.stringify(resData))
+            res.status(200).json(resData)
+        }
+
+        else if (state) {
+            const data = state.toLocaleLowerCase().trim()
+            const cachedKey = `Data : ${data}`
+            const cachedData = await client.get(cachedKey)
+            if (cachedData) {
+                return res.status(200).json(JSON.parse(cachedData))
+            }
+            const info = await StatesModel.find({ name: data })
+            if (info.length === 0) {
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${data.toUpperCase()} correctly?`)
+            }
             const result = info.map((ans) => {
                 return {
                     "State": ans.name,
@@ -80,24 +97,28 @@ interface reqQuery {
                     "Region": ans.region
                 }
             })
+            await client.setEx(cachedKey, 600, JSON.stringify(result))
             res.status(200).json(result)
         }
+
         else if (lgas) {
-            const info = await StatesModel.find({ lgas: lgas })
-            console.log(info);
-
-
-            if (!info) {
-                throw createHttpError(404, `No data found. Perhaps check if you spelt ${lgas.toUpperCase()} correctly?`)
+            const data = lgas.toLocaleLowerCase().trim()
+            const cachedKey = `Data : ${data}`
+            const cachedData = await client.get(cachedKey)
+            if (cachedData) {
+                return res.status(200).json(JSON.parse(cachedData))
             }
-            res.status(200).json(info)
+            const info = await StatesModel.find({ lgas: data })
+            if (info.length===0) {
+                throw createHttpError(404, `No data found. Perhaps check if you spelt ${data.toUpperCase()} correctly?`)
+            }
+            const result = {  
+                "Location": info[0].name,
+                "Region":info[0].region,
+            }           
+            res.status(200).json(result)
         }
-
     } catch (error) {
         next(error)
     }
 }
-
-
-
-// 1oqgRrklivASYQMaIh9nLeNMG9FRvYzE
