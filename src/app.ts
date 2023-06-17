@@ -17,8 +17,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(
     cors({
-      origin: ["https://localeapl.onrender.com",],
-      credentials: true,
+      origin: ["*",],
+      // credentials: true,
     })
   );
 
