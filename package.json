@@ -1,8 +1,8 @@
 {
-  "name": "locale_altschool_capstone",
+  "name": "locale",
   "version": "1.0.0",
   "description": "",
-  "type": "module"
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -61,5 +61,8 @@
     "redis": "^4.6.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3"
+  },
+  "engines": {
+    "node": ">=16 <18"
   }
 }
