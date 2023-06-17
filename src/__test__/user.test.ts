@@ -5,6 +5,7 @@ import UserModel from '../models/user'
 import mongoose from 'mongoose'
 
 
+
 beforeEach(async () => {
     const mongoServer = await MongoMemoryServer.create()
 
@@ -99,29 +100,29 @@ describe("User login", () => {
         supertest(app)
             .post('/api/users/login')
             .send({
-                email:"",
-                passwod:"password1"
+                email: "",
+                passwod: "password1"
             })
-            .then((response)=>{
+            .then((response) => {
                 expect(response.status).toBe(400)
                 done()
             })
 
     })
     it("returns 401 status code when password is incorrect", (done) => {
-        
+
         const newUser = {
             email: "user@gmail.com",
-            password:"password1"
+            password: "password1"
         }
-      UserModel.create(newUser)
+        UserModel.create(newUser)
         supertest(app)
             .post('/api/users/login')
             .send({
-                email:"user@gmail.com",
-                password:"incorrect1"
+                email: "user@gmail.com",
+                password: "incorrect1"
             })
-            .then((response)=>{
+            .then((response) => {
                 expect(response.status).toBe(401)
                 done()
             })
