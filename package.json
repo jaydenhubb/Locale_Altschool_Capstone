@@ -2,11 +2,11 @@
   "name": "locale",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
+  
   "main": "server.js",
   "scripts": {
     "test": "jest",
-    "start":"node ./build/server.js",
+    "start":"node ./dist/server.js",
     "start:dev": "nodemon src/server.ts",
     "lint": "eslint . --ext .ts"
   },
