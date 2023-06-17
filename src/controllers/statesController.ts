@@ -54,13 +54,13 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
 
         if (region) {
             const data = region.toLowerCase().trim()
-            // set cach key
-            // const cachedKey = `Data : ${data}`
+            // set cache key
+            const cachedKey = `Data : ${data}`
             // Check it's existence in the cache
-            // const cachedData = await client.get(cachedKey)
-            // if (cachedData) {
-                // return res.status(200).json(JSON.parse(cachedData))
-            // }
+            const cachedData = await client.get(cachedKey)
+            if (cachedData) {
+                return res.status(200).json(JSON.parse(cachedData))
+            }
             const info = await StatesModel.find({ region: data })
             if (info.length === 0) {
                 throw createHttpError(404, `No data found. Perhaps check if you spelt ${data.toUpperCase()} correctly?`)
@@ -73,7 +73,7 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
                 "States in region": result
             }
             // set cach value 
-            // await client.setEx(cachedKey, 600, JSON.stringify(resData))
+            await client.setEx(cachedKey, 600, JSON.stringify(resData))
             res.status(200).json(resData)
         }
 
@@ -101,7 +101,7 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
                     "Local Government Areas": ans.lgas
                 }
             })
-            // await client.setEx(cachedKey, 600, JSON.stringify(result))
+            await client.setEx(cachedKey, 600, JSON.stringify(result))
             res.status(200).json(result)
         }
 

@@ -76,8 +76,9 @@ export const login: RequestHandler<unknown, unknown, loginBody, unknown>= async(
         const user = await UserModel.findOne({email}).select("+password").select("+email").exec()
         if(!user){
             throw createHttpError(401, "Invalid Credentials")
-        } 
-        const hashedPassword = await bcrypt.compare(password, user.password)
+        }
+        
+        const hashedPassword = user.password != undefined ? await bcrypt.compare(password, user.password) : null
         if(!hashedPassword){
             throw createHttpError(401, "Invalid Credentials")
         }

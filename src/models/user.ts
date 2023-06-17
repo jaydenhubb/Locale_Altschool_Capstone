@@ -23,9 +23,11 @@ userSchema.pre("save", async function(next){
         return next()
     }
     const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(this.password, salt)
-    this.password = hashedPassword
-    next()
+    if(this.password != undefined){
+        const hashedPassword = await bcrypt.hash(this.password, salt)
+        this.password = hashedPassword
+        next()
+    }
 })
 type User = InferSchemaType<typeof userSchema>
 
