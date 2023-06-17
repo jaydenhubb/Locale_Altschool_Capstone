@@ -47,20 +47,20 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
 
     try {
         const { state, lgas, region } = req.query
-        
-        if (!region || !lgas || !state) {
+
+        if (!region && !lgas && !state) {
             throw createHttpError(400, "You must attach a 'state', 'lgas', or 'region' and it's corresponding search term to proceed. Vist the documentation to see the guide. ")
         }
 
         if (region) {
-            const data = region.toLocaleUpperCase().trim()
+            const data = region.toLowerCase().trim()
             // set cach key
-            const cachedKey = `Data : ${data}`
+            // const cachedKey = `Data : ${data}`
             // Check it's existence in the cache
-            const cachedData = await client.get(cachedKey)
-            if (cachedData) {
-                return res.status(200).json(JSON.parse(cachedData))
-            }
+            // const cachedData = await client.get(cachedKey)
+            // if (cachedData) {
+                // return res.status(200).json(JSON.parse(cachedData))
+            // }
             const info = await StatesModel.find({ region: data })
             if (info.length === 0) {
                 throw createHttpError(404, `No data found. Perhaps check if you spelt ${data.toUpperCase()} correctly?`)
@@ -73,12 +73,12 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
                 "States in region": result
             }
             // set cach value 
-            await client.setEx(cachedKey, 600, JSON.stringify(resData))
+            // await client.setEx(cachedKey, 600, JSON.stringify(resData))
             res.status(200).json(resData)
         }
 
         else if (state) {
-            const data = state.toLocaleLowerCase().trim()
+            const data = state.toLowerCase().trim()
             const cachedKey = `Data : ${data}`
             const cachedData = await client.get(cachedKey)
             if (cachedData) {
@@ -92,17 +92,21 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
                 return {
                     "State": ans.name,
                     "Capital": ans.capital,
-                    "Slogan": ans.slogan,
                     "Governor": ans.governor,
-                    "Region": ans.region
+                    "Deputy": ans.deputy,
+                    "Population": ans.population,
+                    "Land mass": ans.landmass,
+                    "Slogan": ans.slogan,
+                    "Region": ans.region,
+                    "Local Government Areas": ans.lgas
                 }
             })
-            await client.setEx(cachedKey, 600, JSON.stringify(result))
+            // await client.setEx(cachedKey, 600, JSON.stringify(result))
             res.status(200).json(result)
         }
 
         else if (lgas) {
-            const data = lgas.toLocaleLowerCase().trim()
+            const data = lgas.toLowerCase().trim()
             const cachedKey = `Data : ${data}`
             const cachedData = await client.get(cachedKey)
             if (cachedData) {
@@ -116,6 +120,7 @@ export const getData: RequestHandler<unknown, unknown, unknown, reqQuery> = asyn
                 "Location": info[0].name,
                 "Region":info[0].region,
             }           
+            await client.setEx(cachedKey, 600, JSON.stringify(result))
             res.status(200).json(result)
         }
     } catch (error) {

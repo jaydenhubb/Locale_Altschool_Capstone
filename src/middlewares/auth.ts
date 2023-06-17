@@ -18,7 +18,7 @@ export const RequireAuth: RequestHandler<unknown, unknown, unknown, reqQuery> = 
         }
         const user = await UserModel.findOne({ apiKey: apikey })
         if (!user) {
-            next(createHttpError(404, "Invalid API key"))
+            next(createHttpError(401, "UnAuthorized! Invalid API key"))
         } else {
             next()
         }

@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt'
 interface SignUpBody {
     email: string;
     password: string;
+    apiKey?:string
 }
 
 export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= async(req, res, next)=>{
@@ -26,7 +27,7 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= asyn
                     throw createHttpError(400, 'Email already exists');
                 }
         // create APIkey
-        const apikey = generateApiKey({
+        const apiKey = generateApiKey({
             method: "base32",
             dashes: false,
             prefix: "jay",
@@ -35,8 +36,11 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= asyn
         const user = await UserModel.create({
             email,
             password,
-            apiKey:apikey
+            apiKey,
+            
         })
+        await user.save()
+        
         // create token
         const token = util.createToken(user._id)
         
@@ -48,8 +52,8 @@ export const signUp: RequestHandler<unknown, unknown, SignUpBody, unknown>= asyn
             secure: true,
           });
           if(user){
-            const {email, }= user
-            res.status(201).json({email,"key":apikey })
+            const {email }= user
+            res.status(201).json({email, "key": apiKey })
           }
     }
 

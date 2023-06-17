@@ -10,7 +10,7 @@ const userSchema = new Schema({
         trim: true, select: false
     },
     password: { type: String, required: [true, "Please add a password"], select: false },
-    apiKey: { type: String },
+    apiKey: { type: String, },
     viewed: {type: Boolean, default:false}
 
 }, {
