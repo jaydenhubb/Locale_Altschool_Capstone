@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "start":"node ./build/index.js",
+    "start":"node ./build/server.js",
     "start:dev": "nodemon src/server.ts",
     "lint": "eslint . --ext .ts"
   },
