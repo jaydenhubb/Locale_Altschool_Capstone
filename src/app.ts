@@ -17,8 +17,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(
     cors({
-      origin: "*",
-      // credentials: true,
+      origin: ["https://jerryjay.stoplight.io",],
+      credentials: true,
     })
   );
 
