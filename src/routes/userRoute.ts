@@ -3,7 +3,7 @@ const router = express.Router()
 import * as UserController from '../controllers/userController'
 import swaggerJsdoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
-import { version } from "../../package.json";
+// import { version } from "../../package.json";
 
 
 
@@ -32,23 +32,23 @@ import { version } from "../../package.json";
 router.post('/signup', UserController.signUp)
 router.post('/login', UserController.login)
 
-const swaggerOptions = {
-    definition: {
-      openapi: version,
-      info: {
-        title: `API ${version}`,
-        version
-    },
-      servers: [
-        {
-          url: 'http://localhost:5000',
-        },
-      ],
-    },
-    apis: ['./src/routes/userRoutes.ts'], 
-  };
+// const swaggerOptions = {
+//     definition: {
+//       openapi: version,
+//       info: {
+//         title: `API ${version}`,
+//         version
+//     },
+//       servers: [
+//         {
+//           url: 'http://localhost:5000',
+//         },
+//       ],
+//     },
+//     apis: ['./src/routes/userRoutes.ts'], 
+//   };
 
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-router.use('/api-docs', swaggerUi.serve);
-router.get('/api-docs', swaggerUi.setup(swaggerSpec));
+// const swaggerSpec = swaggerJsdoc(swaggerOptions);
+// router.use('/api-docs', swaggerUi.serve);
+// router.get('/api-docs', swaggerUi.setup(swaggerSpec));
 export default router
