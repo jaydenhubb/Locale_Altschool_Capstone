@@ -1,12 +1,16 @@
 import 'dotenv/config'
 import express from 'express';
 import morgan from 'morgan'
-import cors from 'cors'
+// import cors from 'cors'
+// import * as cors from 
+
 import cookieParser from 'cookie-parser';
 import errorHandler from './middlewares/errorMiddleware';
 import userRoute from "./routes/userRoute"
 import statesroute from "./routes/datatRoute"
 import { limiter } from './middlewares/limiter';
+
+const cors = require('cors')
 
 
 
