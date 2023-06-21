@@ -17,14 +17,9 @@ const cors = require('cors')
 const app = express()
 app.use(morgan('dev'))
 app.use(express.json())
+app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(
-  cors({
-    origin: "https://jerryjay.stoplight.io",
-    credentials: true,
-  })
-);
 // app.use((req, res, next) => {
 //   res.setHeader('Access-Control-Allow-Origin', '*');
 //   next();
